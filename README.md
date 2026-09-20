@@ -1,4 +1,4 @@
-# MCP Gateway
+# MCP Gateway (IN-Development)
 
 An open source control plane for [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) servers. Connect HTTP and stdio MCP servers, discover tools, group them into scoped endpoints, and manage secrets, rate limits, API keys, and usage from one lightweight Go service with a built-in web UI.
 
