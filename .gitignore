@@ -1,12 +1,13 @@
-# Local gateway state
+# Dependencies and build output
+node_modules/
+.next/
+tsconfig.tsbuildinfo
+
+# Local data
 mcp-gateway.json
 mcp-gateway.db
 mcp-gateway.db-*
 mcp-gateway-debug-bin
-
-# Dependencies and frontend build scratch output
-node_modules/
-ui/dist/
 
 # Environment and secrets
 .env
@@ -19,9 +20,6 @@ logs/
 tmp/
 temp/
 
-# Go test/build artifacts (root-anchored so charts/mcp-gateway stays tracked)
-/mcp-gateway
-*.test
 *.out
 coverage.out
 coverage.html

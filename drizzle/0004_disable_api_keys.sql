@@ -1,0 +1,1 @@
+ALTER TABLE "api_keys" ADD COLUMN "disabled" boolean DEFAULT false NOT NULL;

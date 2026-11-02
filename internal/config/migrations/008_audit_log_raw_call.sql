@@ -1,1 +1,0 @@
-ALTER TABLE audit_logs ADD COLUMN raw_call TEXT NOT NULL DEFAULT '';
