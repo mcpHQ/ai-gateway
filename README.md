@@ -1,6 +1,17 @@
 # AI Gateway
 
-An open-source AI gateway. Point an OpenAI SDK at one base URL, bring your own provider keys, and get ordered routing, fallbacks, exact-match caching, rate limits, monthly budgets, and request logs.
+An open-source gateway for OpenAI-compatible clients. Point an SDK at one base URL, store your own provider keys, and the gateway routes each call, fails over, and records tokens, cost, and latency.
+
+One installation has one account. A workspace can hold several gateways. Provider credentials belong to the workspace. Each gateway has its own API keys, budgets, cache, threat detection, and request log.
+
+## Features
+
+- OpenAI chat completions, Responses, embeddings, and models, plus Anthropic Messages
+- Ordered providers and fallbacks, with one retry on HTTP 429, HTTP 5xx, or a timeout
+- Exact-match response cache, optional semantic cache, and provider prompt caching
+- Monthly budgets and a per-key request rate limit
+- Threat detection for instruction override, leaked secrets, and payment card numbers
+- Dashboard for spend, request logs, providers, keys, and a cost calculator
 
 ## Quick start
 
@@ -8,34 +19,9 @@ An open-source AI gateway. Point an OpenAI SDK at one base URL, bring your own p
 docker compose up --build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) and create the account. Only one account can be created. After that, use sign in. Then add a provider and create a gateway API key.
+Open [http://localhost:3000](http://localhost:3000) and create the account. Later visits use sign in. Add a provider, then create a gateway API key.
 
-The Compose file starts Postgres and the Next.js app. The app applies database migrations on startup. Gateway state lives in the `aicost-postgres` volume.
-
-### Kubernetes
-
-Merging to `main` publishes `ghcr.io/mcphq/ai-gateway:main`. Publishing a GitHub release also publishes that version and moves `:latest`. The chart can start Postgres, or use a database you already run. Migrations run when the container starts.
-
-```bash
-docker build -t ghcr.io/mcphq/ai-gateway:0.1.0 .
-helm upgrade --install ai-gateway charts/ai-gateway \
-  --set image.tag=0.1.0 \
-  --set auth.url=http://localhost:3000
-kubectl port-forward svc/ai-gateway 3000:80
-```
-
-Set `auth.url` to the origin browsers will use. Details are in [charts/ai-gateway/README.md](charts/ai-gateway/README.md).
-
-### Local development
-
-```bash
-npm install
-docker compose up postgres -d
-npm run db:migrate
-npm run dev
-```
-
-Copy [`.env.example`](.env.example) to `.env` and set `BETTER_AUTH_SECRET` and `ENCRYPTION_KEY` before storing provider keys.
+Compose starts Postgres and the app. The container applies database migrations before it listens. Data stays in the `aicost-postgres` volume. The local image is named `ai-gateway`.
 
 ## Call the gateway
 
@@ -49,26 +35,73 @@ curl http://localhost:3000/v1/chat/completions \
   }'
 ```
 
-A workspace can contain more than one gateway. Each gateway has its own keys, budgets, cache, threat detection, and request log. Provider credentials are shared by the workspace. The same key works for `/v1/responses`, `/v1/embeddings`, and `/v1/models`. Anthropic Messages is `POST /v1/messages`; the Anthropic SDK can send the gateway key in `x-api-key`. A request that falls back to the other provider is translated: Messages calls become chat completions, and Responses calls become Messages.
+| Endpoint | Client |
+| --- | --- |
+| `POST /v1/chat/completions` | OpenAI chat |
+| `POST /v1/responses` | OpenAI Responses |
+| `POST /v1/embeddings` | OpenAI embeddings |
+| `GET /v1/models` | Model list |
+| `POST /v1/messages` | Anthropic Messages (`x-api-key` or a bearer token) |
 
-Model ids can be `openai/gpt-4o-mini`, `anthropic/claude-haiku-4-5`, `gemini/gemini-3.5-flash`, or a bare catalog id. Providers of the matching type are tried in ascending priority. A provider that lists the model is tried after those. Each provider is retried once on HTTP 429, HTTP 5xx, or a timeout. Any other 4xx stops the chain.
+The same gateway key works for every endpoint. A fallback that crosses providers is translated: Messages become chat completions, and Responses become Messages.
 
-Optional controls:
+Model ids can be `openai/gpt-4o-mini`, `anthropic/claude-haiku-4-5`, `gemini/gemini-3.5-flash`, or a bare catalog id. Providers of the matching type are tried in ascending priority. A provider that lists the model is tried after those. Any other HTTP 4xx stops the chain.
 
-- `x-ai-gateway-fallbacks`: comma-separated fallback models, or `gateway.fallbacks` in the JSON body
-- `x-ai-gateway-cache-ttl`: cache successful non-streaming responses for at least 60 seconds, or set a workspace default
-- `x-ai-gateway-cache-mode: semantic`: after an exact miss, embed the latest user message and reuse a stored response when cosine similarity is at least the workspace threshold (default 0.95). Tool calls and conversations longer than four messages skip this lookup
-- `x-ai-gateway-prompt-cache: auto`: ask the provider to cache the prompt prefix. Anthropic requests get `cache_control` markers. OpenAI, Google, and DeepSeek already cache identical prefixes, so those bodies are left unchanged
-- A workspace default fallback list is used when the request does not set one
+### Request controls
 
-The `gateway` object is removed before the provider call. Responses include `x-ai-gateway-provider`, `x-ai-gateway-model`, `x-ai-gateway-attempt`, and `x-ai-gateway-cache`.
+Send these as headers, or as a `gateway` object in the JSON body. That object is removed before the provider call.
 
-Monthly budgets return `402`. A per-key requests-per-minute limit returns `429` with `Retry-After`. Cache hits cost nothing and do not call the provider.
+| Control | Effect |
+| --- | --- |
+| `x-ai-gateway-fallbacks` | Comma-separated fallback models. The gateway default is used when the request sets none. |
+| `x-ai-gateway-cache-ttl` | Cache a successful non-streaming response. Minimum 60 seconds. |
+| `x-ai-gateway-cache-mode: semantic` | After an exact miss, reuse a stored response when cosine similarity is at least the gateway threshold (default 0.95). Tool calls and conversations longer than four messages skip this lookup. |
+| `x-ai-gateway-prompt-cache: auto` | Ask the provider to cache the prompt prefix. Anthropic requests get `cache_control` markers. OpenAI, Google, and DeepSeek bodies are left unchanged. |
 
-Threat detection runs before the provider call. The workspace setting is flag, block, or off. Flag records the finding and continues. Block returns `403` and does not call the provider. The checks look for instruction-override text, common secret shapes, and payment card numbers. A flagged response includes `x-ai-gateway-guard: flag`.
+Responses include `x-ai-gateway-provider`, `x-ai-gateway-model`, `x-ai-gateway-attempt`, and `x-ai-gateway-cache`.
 
-## Tests
+A monthly budget returns `402`. A per-key requests-per-minute limit returns `429` with `Retry-After`. Cache hits are not billed and do not call a provider.
+
+### Threat detection
+
+Each gateway is set to **flag**, **block**, or **off**. The check runs before the cache lookup and the provider call.
+
+- **Flag** records the finding and continues. The response includes `x-ai-gateway-guard: flag`.
+- **Block** returns `403` and does not call a provider.
+- **Off** skips the check.
+
+The check looks for instruction-override phrasing, payment card numbers, and secrets matched by [secretlint](https://github.com/secretlint/secretlint)'s recommended rules. Only the finding code is stored, not the matched secret.
+
+## Kubernetes
+
+Merging to `main` publishes `ghcr.io/mcphq/ai-gateway:main`. Publishing a GitHub release such as `v0.1.0` also publishes `0.1.0`, `0.1`, `0`, and moves `:latest`.
+
+```bash
+helm upgrade --install ai-gateway charts/ai-gateway \
+  --set image.repository=ghcr.io/mcphq/ai-gateway \
+  --set image.tag=main \
+  --set auth.url=http://localhost:3000
+kubectl port-forward svc/ai-gateway 3000:80
+```
+
+`auth.url` must be the origin browsers use, or sign-in cookies will not match. The chart can start Postgres, or use a database you already run. Migrations run when the container starts. Chart options are in [charts/ai-gateway/README.md](charts/ai-gateway/README.md).
+
+## Local development
+
+```bash
+npm install
+docker compose up postgres -d
+cp .env.example .env
+npm run db:migrate
+npm run dev
+```
+
+Set `BETTER_AUTH_SECRET` and `ENCRYPTION_KEY` in `.env` before storing provider keys. `ENCRYPTION_KEY` is 64 hex characters. Changing it makes stored provider keys unreadable.
 
 ```bash
 npm test
 ```
+
+## License
+
+[Apache-2.0](LICENSE)
