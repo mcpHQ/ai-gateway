@@ -8,7 +8,7 @@ import * as schema from "@/lib/db/schema";
 import { memberships, organizations, user as userTable } from "@/lib/db/schema";
 import { signupAllowed } from "@/lib/signup";
 import { createGatewayRecord } from "@/lib/gateway-record";
-import { originsForRequest } from "@/lib/auth-origins";
+import { originsForRequest, publicBaseUrl } from "@/lib/auth-origins";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -16,7 +16,7 @@ export const auth = betterAuth({
     schema,
   }),
   secret: process.env.BETTER_AUTH_SECRET || "build-placeholder-secret-not-for-production-use",
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  baseURL: publicBaseUrl(),
   trustedOrigins: originsForRequest,
   emailAndPassword: {
     enabled: true,

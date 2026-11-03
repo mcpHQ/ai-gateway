@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { originsForRequest } from "./auth-origins";
+import { originsForRequest, publicBaseUrl } from "./auth-origins";
 
 describe("auth origins", () => {
   it("trusts localhost on whatever port served the page", () => {
@@ -20,6 +20,21 @@ describe("auth origins", () => {
       },
     });
     expect(originsForRequest(request)).toContain("https://gateway.example.com");
+  });
+
+  it("uses the platform hostname when no public URL is set", () => {
+    const previousUrl = process.env.BETTER_AUTH_URL;
+    const previousRender = process.env.RENDER_EXTERNAL_URL;
+    delete process.env.BETTER_AUTH_URL;
+    process.env.RENDER_EXTERNAL_URL = "https://ai-gateway.onrender.com/";
+    try {
+      expect(publicBaseUrl()).toBe("https://ai-gateway.onrender.com");
+    } finally {
+      if (previousUrl === undefined) delete process.env.BETTER_AUTH_URL;
+      else process.env.BETTER_AUTH_URL = previousUrl;
+      if (previousRender === undefined) delete process.env.RENDER_EXTERNAL_URL;
+      else process.env.RENDER_EXTERNAL_URL = previousRender;
+    }
   });
 
   it("rejects a browser origin that does not match the host", () => {

@@ -1,10 +1,10 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:crypto";
 
 function encryptionKey() {
-  const raw = process.env.ENCRYPTION_KEY || "";
-  const buf = Buffer.from(raw, "hex");
+  const raw = (process.env.ENCRYPTION_KEY || "").trim();
+  const buf = /^[0-9a-fA-F]{64}$/.test(raw) ? Buffer.from(raw, "hex") : Buffer.from(raw, "base64");
   if (buf.length !== 32) {
-    throw new Error("ENCRYPTION_KEY must be 64 hex characters (32 bytes)");
+    throw new Error("ENCRYPTION_KEY must be 64 hex characters or 32-byte base64");
   }
   return buf;
 }

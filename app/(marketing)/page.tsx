@@ -150,7 +150,18 @@ export default async function HomePage() {
               {hasAccount ? "Sign in" : "Create the account"}
             </Link>
           </div>
-          <div className="mt-8 grid gap-4 lg:grid-cols-2">
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <a href="https://render.com/deploy?repo=https://github.com/mcpHQ/ai-gateway">
+              <img src="https://render.com/images/deploy-to-render-button.svg" alt="Deploy to Render" className="h-10" />
+            </a>
+            <a href="https://railway.com/new/template?template=https%3A%2F%2Fgithub.com%2FmcpHQ%2Fai-gateway&plugins=postgresql&envs=DATABASE_URL%2CBETTER_AUTH_URL%2CBETTER_AUTH_SECRET%2CENCRYPTION_KEY&DATABASE_URLDefault=%24%7B%7B%20DATABASE_URL%20%7D%7D&DATABASE_URLDesc=Provided%20by%20Postgres.%20Leave%20this%20value.&BETTER_AUTH_URLDefault=https%3A%2F%2F%24%7B%7B%20RAILWAY_PUBLIC_DOMAIN%20%7D%7D&BETTER_AUTH_URLDesc=Public%20origin%20for%20sign-in.%20Leave%20the%20default.&BETTER_AUTH_SECRETDesc=A%20long%20random%20string.&ENCRYPTION_KEYDesc=64%20hex%20characters%20from%20openssl%20rand%20-hex%2032">
+              <img src="https://railway.com/button.svg" alt="Deploy on Railway" className="h-10" />
+            </a>
+            <a href="https://github.com/mcpHQ/ai-gateway/blob/main/docker-compose.coolify.yml" className="btn-secondary h-10 px-4">
+              Deploy on Coolify
+            </a>
+          </div>
+          <div className="mt-4 grid gap-4 lg:grid-cols-2">
             <Command
               title="Docker Compose"
               command={"# .env next to docker-compose.yml\nBETTER_AUTH_URL=https://gateway.example.com\n\ndocker compose up --build"}

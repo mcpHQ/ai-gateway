@@ -17,6 +17,12 @@ One installation has one account. A workspace can hold several gateways. Provide
 
 ## Install
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/mcpHQ/ai-gateway)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template?template=https%3A%2F%2Fgithub.com%2FmcpHQ%2Fai-gateway&plugins=postgresql&envs=DATABASE_URL%2CBETTER_AUTH_URL%2CBETTER_AUTH_SECRET%2CENCRYPTION_KEY&DATABASE_URLDefault=%24%7B%7B%20DATABASE_URL%20%7D%7D&DATABASE_URLDesc=Provided%20by%20Postgres.%20Leave%20this%20value.&BETTER_AUTH_URLDefault=https%3A%2F%2F%24%7B%7B%20RAILWAY_PUBLIC_DOMAIN%20%7D%7D&BETTER_AUTH_URLDesc=Public%20origin%20for%20sign-in.%20Leave%20the%20default.&BETTER_AUTH_SECRETDesc=A%20long%20random%20string.&ENCRYPTION_KEYDesc=64%20hex%20characters%20from%20openssl%20rand%20-hex%2032)
+[![Deploy on Coolify](https://img.shields.io/badge/Deploy%20on-Coolify-6B16FF)](https://github.com/mcpHQ/ai-gateway/blob/main/docker-compose.coolify.yml)
+
+Render and Railway open a hosted app and Postgres from this repo. Coolify runs [`docker-compose.coolify.yml`](docker-compose.coolify.yml) on a server you control: New resource, Public repository `https://github.com/mcpHQ/ai-gateway`, Compose file `docker-compose.coolify.yml`. It fills the public URL, database password, auth secret, and encryption key.
+
 ### Docker Compose
 
 Compose starts Postgres and the app, builds an image named `ai-gateway`, and keeps data in the `aicost-postgres` volume. The container applies migrations before it listens.

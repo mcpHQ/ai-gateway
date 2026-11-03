@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: ai-gateway
+    runtime: docker
+    healthCheckPath: /healthz
+    autoDeployTrigger: off
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ai-gateway-db
+          property: connectionString
+      - key: BETTER_AUTH_SECRET
+        generateValue: true
+      - key: ENCRYPTION_KEY
+        generateValue: true
+      - key: NODE_ENV
+        value: production
+
+databases:
+  - name: ai-gateway-db
+    databaseName: aicost
+    user: aicost

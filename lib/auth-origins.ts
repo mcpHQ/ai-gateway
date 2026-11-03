@@ -11,9 +11,23 @@ export function originsForRequest(request?: Request) {
   return [...origins];
 }
 
+export function publicBaseUrl() {
+  const railway = process.env.RAILWAY_PUBLIC_DOMAIN?.trim();
+  const raw =
+    process.env.BETTER_AUTH_URL?.trim() ||
+    process.env.RENDER_EXTERNAL_URL?.trim() ||
+    (railway ? `https://${railway}` : "") ||
+    "http://localhost:3000";
+  return raw.replace(/\/+$/, "");
+}
+
 function configuredOrigins() {
+  const railway = process.env.RAILWAY_PUBLIC_DOMAIN?.trim();
   const values = [
+    publicBaseUrl(),
     process.env.BETTER_AUTH_URL,
+    process.env.RENDER_EXTERNAL_URL,
+    railway ? `https://${railway}` : "",
     process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
