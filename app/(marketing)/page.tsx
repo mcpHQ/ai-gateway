@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { accountExists } from "@/lib/account";
 
+export const dynamic = "force-dynamic";
+
 const snippet = `import OpenAI from "openai";
 
 const client = new OpenAI({

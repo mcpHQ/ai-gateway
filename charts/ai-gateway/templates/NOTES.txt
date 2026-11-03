@@ -1,0 +1,23 @@
+The AI Gateway is starting.
+
+The public URL is {{ .Values.auth.url }}.
+Sign-in cookies are issued for that origin. Change auth.url before exposing the service.
+
+{{- if .Values.ingress.enabled }}
+
+Ingress is enabled. Open the host from values once DNS points at the ingress.
+{{- else }}
+
+Forward the service to the same host and port as auth.url:
+
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "ai-gateway.fullname" . }} 3000:{{ .Values.service.port }}
+
+Then open {{ .Values.auth.url }}.
+{{- end }}
+
+Only one account can be created. Create it, then sign in, add a provider, and create a gateway key.
+
+The image {{ include "ai-gateway.image" . }} must already be in the registry. Build and push it with:
+
+  docker build -t {{ include "ai-gateway.image" . }} .
+  docker push {{ include "ai-gateway.image" . }}

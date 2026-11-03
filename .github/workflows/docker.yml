@@ -4,17 +4,21 @@ on:
   push:
     branches:
       - main
-    tags:
-      - "v*.*.*"
+  release:
+    types:
+      - published
   pull_request:
     branches:
       - main
 
+concurrency:
+  group: docker-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   REGISTRY: ghcr.io
-  # github.repository is mcpHQ/mcp-gateway; the metadata action lowercases it
-  # to mcphq/mcp-gateway, as required by GHCR.
-  IMAGE_NAME: ${{ github.repository }}
+  # GHCR requires a lowercase name. The metadata action lowercases the owner.
+  IMAGE_NAME: ${{ github.repository_owner }}/ai-gateway
 
 jobs:
   build:
@@ -26,6 +30,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # A published release points github.sha at the default branch tip.
+          # Check out the release tag so the image matches that version.
+          ref: ${{ github.event_name == 'release' && github.event.release.tag_name || github.sha }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -47,23 +55,20 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            # latest on pushes to the default branch
-            type=raw,value=latest,enable={{is_default_branch}}
-            # v1.2.3 tags -> 1.2.3, 1.2, 1
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            # branch name (main) and short commit SHA
-            type=ref,event=branch
-            type=sha
+            type=raw,value=latest,enable=${{ github.event_name == 'release' }}
+            type=semver,pattern={{version}},enable=${{ github.event_name == 'release' }}
+            type=semver,pattern={{major}}.{{minor}},enable=${{ github.event_name == 'release' }}
+            type=semver,pattern={{major}},enable=${{ github.event_name == 'release' }}
+            type=raw,value=main,enable=${{ github.event_name == 'push' }}
+            type=sha,enable=${{ github.event_name != 'pull_request' }}
 
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/amd64,linux/arm64
-          # PRs only build to verify the Dockerfile; publishing happens on
-          # pushes to main and version tags.
+          # Pull requests only prove the image builds. Publishing happens
+          # after a merge to main and when a GitHub release is published.
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

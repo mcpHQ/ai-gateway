@@ -12,6 +12,20 @@ Open [http://localhost:3000](http://localhost:3000) and create the account. Only
 
 The Compose file starts Postgres and the Next.js app. The app applies database migrations on startup. Gateway state lives in the `aicost-postgres` volume.
 
+### Kubernetes
+
+Merging to `main` publishes `ghcr.io/mcphq/ai-gateway:main`. Publishing a GitHub release also publishes that version and moves `:latest`. The chart can start Postgres, or use a database you already run. Migrations run when the container starts.
+
+```bash
+docker build -t ghcr.io/mcphq/ai-gateway:0.1.0 .
+helm upgrade --install ai-gateway charts/ai-gateway \
+  --set image.tag=0.1.0 \
+  --set auth.url=http://localhost:3000
+kubectl port-forward svc/ai-gateway 3000:80
+```
+
+Set `auth.url` to the origin browsers will use. Details are in [charts/ai-gateway/README.md](charts/ai-gateway/README.md).
+
 ### Local development
 
 ```bash

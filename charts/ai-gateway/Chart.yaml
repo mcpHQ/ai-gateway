@@ -1,0 +1,7 @@
+apiVersion: v2
+name: ai-gateway
+description: AI Gateway — one OpenAI-compatible endpoint in front of your provider keys
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+kubeVersion: ">=1.25.0-0"

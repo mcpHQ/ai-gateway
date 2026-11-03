@@ -16,6 +16,7 @@ services:
       retries: 10
 
   web:
+    image: ai-gateway
     build: .
     ports:
       - "3000:3000"

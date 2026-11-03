@@ -2,6 +2,8 @@ import Link from "next/link";
 import { SignupForm } from "@/components/signup-form";
 import { accountExists } from "@/lib/account";
 
+export const dynamic = "force-dynamic";
+
 export default async function SignupPage() {
   if (await accountExists()) {
     return (
