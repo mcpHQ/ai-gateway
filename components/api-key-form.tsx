@@ -75,10 +75,10 @@ export function ApiKeyForm({ mode, id, disabled = false }: { mode: "create" | "d
       </label>
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       {secret ? (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
-          <p className="text-sm text-amber-950">Copy this key now. It will not be shown again.</p>
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950">
+          <p className="text-sm text-amber-950 dark:text-amber-100">Copy this key now. It will not be shown again.</p>
           <div className="mt-2 flex items-center gap-2">
-            <code className="min-w-0 flex-1 overflow-x-auto rounded-lg bg-white px-2.5 py-2 font-mono text-xs whitespace-nowrap text-foreground">
+            <code className="min-w-0 flex-1 overflow-x-auto rounded-lg bg-background px-2.5 py-2 font-mono text-xs whitespace-nowrap text-foreground">
               {secret}
             </code>
             <button

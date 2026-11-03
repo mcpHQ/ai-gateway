@@ -51,6 +51,9 @@ export default async function HomePage() {
               <a href="https://github.com/mcpHQ/ai-gateway/blob/main/docker-compose.coolify.yml" target="_blank" rel="noopener noreferrer">
                 <img src="/deploy-coolify.svg" alt="Deploy on Coolify" className="h-10" />
               </a>
+              <a href="https://cloud.okteto.com/deploy?repository=https://github.com/mcpHQ/ai-gateway&branch=main&filename=okteto.yml" target="_blank" rel="noopener noreferrer">
+                <img src="https://okteto.com/develop-okteto.svg" alt="Develop on Okteto" className="h-10" />
+              </a>
             </div>
           </div>
           <Snippet />
@@ -82,7 +85,7 @@ export default async function HomePage() {
         </ol>
       </section>
 
-      <section id="routing" className="scroll-mt-20 border-t border-border bg-white/70">
+      <section id="routing" className="scroll-mt-20 border-t border-border bg-card/70">
         <div className="mx-auto grid max-w-6xl gap-10 px-6 py-16 lg:grid-cols-2 lg:items-center">
           <div>
             <h2 className="text-3xl font-semibold tracking-tight">Failover without a rewrite.</h2>
@@ -134,7 +137,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="border-y border-border bg-white/70">
+      <section className="border-y border-border bg-card/70">
         <div className="mx-auto grid max-w-6xl gap-10 px-6 py-16 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
             <h2 className="text-3xl font-semibold tracking-tight">Stop a bad prompt before it is billed.</h2>
@@ -239,7 +242,7 @@ function ProviderLogo({ name }: { name: (typeof providers)[number]["logo"] }) {
     );
   }
   const src = { openai: "/logos/openai.svg", anthropic: "/logos/anthropic.svg", gemini: "/logos/gemini.svg" }[name];
-  return <img src={src} alt="" className="h-5 w-5 shrink-0 object-contain" />;
+  return <img src={src} alt="" className={`h-5 w-5 shrink-0 object-contain ${name === "openai" ? "dark:invert" : ""}`} />;
 }
 
 function Line({ children }: { children?: React.ReactNode }) {
@@ -265,7 +268,7 @@ function RouteRow({ name, detail, state }: { name: string; detail: string; state
         <span className="font-medium">{name}</span>
         <span className="mt-0.5 block text-xs text-muted-foreground">{detail}</span>
       </span>
-      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${state === "ok" ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"}`}>
+      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${state === "ok" ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300" : "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"}`}>
         {state === "ok" ? "Served" : "Failed"}
       </span>
     </li>

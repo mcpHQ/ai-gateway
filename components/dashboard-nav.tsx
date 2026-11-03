@@ -15,7 +15,7 @@ const links = [
 export function DashboardNav() {
   const pathname = usePathname();
   return (
-    <nav className="flex gap-1 overflow-x-auto border-b border-border/80 bg-white/70 px-3 py-2 backdrop-blur lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:flex-col lg:gap-1 lg:overflow-y-auto lg:border-r lg:border-b-0 lg:px-3 lg:py-5">
+    <nav className="flex gap-1 overflow-x-auto border-b border-border/80 bg-background/70 px-3 py-2 backdrop-blur lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:flex-col lg:gap-1 lg:overflow-y-auto lg:border-r lg:border-b-0 lg:px-3 lg:py-5">
       {links.map((link) => {
         const active = link.href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(link.href);
         return (

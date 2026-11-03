@@ -66,7 +66,7 @@ export function GatewaySwitcher({
         }}
         className={
           placement === "navbar"
-            ? "flex max-w-56 items-center gap-2 rounded-lg border border-border bg-white px-2.5 py-1.5 text-left hover:bg-muted"
+            ? "flex max-w-56 items-center gap-2 rounded-lg border border-border bg-card px-2.5 py-1.5 text-left hover:bg-muted"
             : "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-muted"
         }
       >

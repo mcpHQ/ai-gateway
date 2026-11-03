@@ -45,7 +45,7 @@ export default async function KeysPage({
         </p>
         <ul className="mt-6 space-y-3">
           {rows.length === 0 ? (
-            <li className="rounded-2xl border border-dashed border-border bg-white/70 p-6 text-sm text-muted-foreground">
+            <li className="rounded-2xl border border-dashed border-border bg-card/70 p-6 text-sm text-muted-foreground">
               Create a gateway key for your SDK or agent.
             </li>
           ) : (

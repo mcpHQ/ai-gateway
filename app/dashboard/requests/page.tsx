@@ -79,10 +79,10 @@ export default async function RequestsPage({
                     <span
                       className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
                         row.status >= 500
-                          ? "bg-red-50 text-red-700"
+                          ? "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"
                           : row.status >= 400
-                            ? "bg-amber-50 text-amber-800"
-                            : "bg-emerald-50 text-emerald-700"
+                            ? "bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-200"
+                            : "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
                       }`}
                     >
                       {row.status}

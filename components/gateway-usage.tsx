@@ -67,7 +67,7 @@ export function GatewayUsage({ origin, gatewayName }: { origin: string; gatewayN
                 key={item}
                 type="button"
                 onClick={() => setLanguage(item)}
-                className={`rounded-full px-2.5 py-1 ${activeLanguage === item ? "bg-white font-medium shadow-sm" : "text-muted-foreground"}`}
+                className={`rounded-full px-2.5 py-1 ${activeLanguage === item ? "bg-card font-medium shadow-sm" : "text-muted-foreground"}`}
               >
                 {item}
               </button>

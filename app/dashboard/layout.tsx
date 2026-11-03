@@ -4,12 +4,13 @@ import { requireGateway } from "@/lib/gateway";
 import { SignOutButton } from "@/components/sign-out";
 import { GatewaySwitcher } from "@/components/gateway-switcher";
 import { DashboardNav } from "@/components/dashboard-nav";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { org, user, gateways, gateway } = await requireGateway();
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-40 border-b border-border/80 bg-white/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-border/80 bg-background/80 backdrop-blur-xl">
         <div className="flex h-16 items-center gap-3 px-4 sm:px-6">
           <Link href="/dashboard" className="flex shrink-0 items-center gap-2 font-semibold">
             <Logo className="h-7 w-7" />
@@ -25,6 +26,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <div className="truncate text-sm font-medium">{org.name}</div>
               <div className="truncate text-xs text-muted-foreground">{user.email}</div>
             </div>
+            <ThemeToggle />
             <SignOutButton className="btn-secondary" />
           </div>
         </div>

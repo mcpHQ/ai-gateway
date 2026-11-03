@@ -1,0 +1,6 @@
+deploy:
+  compose: docker-compose.yml
+  endpoints:
+    - path: /
+      service: web
+      port: 3000
