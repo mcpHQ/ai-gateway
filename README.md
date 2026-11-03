@@ -15,15 +15,65 @@ One installation has one account. A workspace can hold several gateways. Provide
 - Threat detection for instruction override, leaked secrets, and payment card numbers
 - Dashboard for spend, request logs, providers, keys, and a cost calculator
 
-## Quick start
+## Install
+
+### Docker Compose
+
+Compose starts Postgres and the app, builds an image named `ai-gateway`, and keeps data in the `aicost-postgres` volume. The container applies migrations before it listens.
+
+For a machine on localhost, run:
 
 ```bash
 docker compose up --build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) and create the account. Later visits use sign in. Add a provider, then create a gateway API key.
+Open [http://localhost:3000](http://localhost:3000), create the account, add a provider, and create a gateway API key. Later visits use sign in.
 
-Compose starts Postgres and the app. The container applies database migrations before it listens. Data stays in the `aicost-postgres` volume. The local image is named `ai-gateway`.
+To serve a public host, set the origin browsers will use. Put this in a `.env` file next to `docker-compose.yml`, then start the stack. Sign-in cookies are issued for that origin, so a proxy in front of port 3000 must serve the same URL.
+
+```bash
+BETTER_AUTH_URL=https://gateway.example.com
+BETTER_AUTH_SECRET=replace-with-a-32-character-secret
+ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+
+docker compose up --build
+```
+
+`ENCRYPTION_KEY` is 64 hex characters. Changing it makes stored provider keys unreadable. Leave `BETTER_AUTH_URL` unset to keep `http://localhost:3000`.
+
+### Kubernetes
+
+Merging to `main` publishes `ghcr.io/mcphq/ai-gateway:main`. Publishing a GitHub release such as `v0.1.0` also publishes `0.1.0`, `0.1`, `0`, and moves `:latest`.
+
+The chart starts Postgres unless you point it at a database you already run. It generates the auth secret, encryption key, and Postgres password on the first install and keeps them on upgrade. Migrations run when the container starts.
+
+```bash
+helm upgrade --install ai-gateway charts/ai-gateway \
+  --set image.repository=ghcr.io/mcphq/ai-gateway \
+  --set image.tag=main \
+  --set auth.url=https://gateway.example.com
+```
+
+`auth.url` is the same setting as `BETTER_AUTH_URL`. It must be the origin browsers use.
+
+Without an ingress, forward the service to that same host and port:
+
+```bash
+kubectl port-forward svc/ai-gateway 3000:80
+```
+
+Use an existing database:
+
+```bash
+helm upgrade --install ai-gateway charts/ai-gateway \
+  --set postgres.enabled=false \
+  --set database.url=postgres://user:pass@db.example:5432/aicost \
+  --set auth.url=https://gateway.example.com \
+  --set auth.secret="$(openssl rand -base64 32)" \
+  --set encryptionKey="$(openssl rand -hex 32)"
+```
+
+More options, including ingress, are in [charts/ai-gateway/README.md](charts/ai-gateway/README.md).
 
 ## Call the gateway
 
@@ -73,20 +123,6 @@ Each gateway is set to **flag**, **block**, or **off**. The check runs before th
 - **Off** skips the check.
 
 The check looks for instruction-override phrasing, payment card numbers, and secrets matched by [secretlint](https://github.com/secretlint/secretlint)'s recommended rules. Only the finding code is stored, not the matched secret.
-
-## Kubernetes
-
-Merging to `main` publishes `ghcr.io/mcphq/ai-gateway:main`. Publishing a GitHub release such as `v0.1.0` also publishes `0.1.0`, `0.1`, `0`, and moves `:latest`.
-
-```bash
-helm upgrade --install ai-gateway charts/ai-gateway \
-  --set image.repository=ghcr.io/mcphq/ai-gateway \
-  --set image.tag=main \
-  --set auth.url=http://localhost:3000
-kubectl port-forward svc/ai-gateway 3000:80
-```
-
-`auth.url` must be the origin browsers use, or sign-in cookies will not match. The chart can start Postgres, or use a database you already run. Migrations run when the container starts. Chart options are in [charts/ai-gateway/README.md](charts/ai-gateway/README.md).
 
 ## Local development
 
