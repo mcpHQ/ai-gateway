@@ -4,6 +4,8 @@ An open-source gateway for OpenAI-compatible clients. Point an SDK at one base U
 
 One installation has one account. A workspace can hold several gateways. Provider credentials belong to the workspace. Each gateway has its own API keys, budgets, cache, threat detection, and request log.
 
+![AI Gateway landing page](docs/landing.jpg)
+
 ## Features
 
 - OpenAI chat completions, Responses, embeddings, and models, plus Anthropic Messages
